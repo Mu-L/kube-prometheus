@@ -13,8 +13,6 @@ TOOLING=$(EMBEDMD_BIN) $(JB_BIN) $(GOJSONTOYAML_BIN) $(JSONNET_BIN) $(JSONNETLIN
 
 JSONNETFMT_ARGS=-n 2 --max-blank-lines 2 --string-style s --comment-style s
 
-KUBE_VERSION?="1.20.0"
-
 all: generate fmt test
 
 .PHONY: clean
@@ -28,7 +26,7 @@ generate: manifests **.md
 **.md: $(EMBEDMD_BIN) $(shell find examples) build.sh example.jsonnet
 	$(EMBEDMD_BIN) -w `find . -name "*.md" | grep -v vendor`
 
-manifests: examples/kustomize.jsonnet $(GOJSONTOYAML_BIN) vendor build.sh
+manifests: examples/kustomize.jsonnet $(GOJSONTOYAML_BIN) vendor
 	./build.sh $<
 
 vendor: $(JB_BIN) jsonnetfile.json jsonnetfile.lock.json
@@ -36,10 +34,23 @@ vendor: $(JB_BIN) jsonnetfile.json jsonnetfile.lock.json
 	$(JB_BIN) install
 
 crdschemas: vendor
-	./scripts/generate-schemas.sh	
+	./scripts/generate-schemas.sh
+
+.PHONY: update
+update: $(JB_BIN)
+	$(JB_BIN) update
 
 .PHONY: validate
-validate: crdschemas manifests $(KUBECONFORM_BIN)
+validate: validate-1.21 validate-1.22
+
+validate-1.21:
+	KUBE_VERSION=1.21.1 $(MAKE) kubeconform
+
+validate-1.22:
+	KUBE_VERSION=1.22.0 $(MAKE) kubeconform
+
+.PHONY: kubeconform
+kubeconform: crdschemas manifests $(KUBECONFORM_BIN)
 	$(KUBECONFORM_BIN) -kubernetes-version $(KUBE_VERSION) -schema-location 'default' -schema-location 'crdschemas/{{ .ResourceKind }}.json' -skip CustomResourceDefinition manifests/
 
 .PHONY: fmt
@@ -55,7 +66,7 @@ lint: $(JSONNETLINT_BIN) vendor
 .PHONY: test
 test: $(JB_BIN)
 	$(JB_BIN) install
-	./test.sh
+	./scripts/test.sh
 
 .PHONY: test-e2e
 test-e2e:

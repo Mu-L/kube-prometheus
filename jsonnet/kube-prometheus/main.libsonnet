@@ -11,6 +11,8 @@ local prometheus = import './components/prometheus.libsonnet';
 
 local platformPatch = import './platforms/platforms.libsonnet';
 
+local utils = import './lib/utils.libsonnet';
+
 {
   // using `values` as this is similar to helm
   values:: {
@@ -41,7 +43,7 @@ local platformPatch = import './platforms/platforms.libsonnet';
         kubeStateMetrics: 'k8s.gcr.io/kube-state-metrics/kube-state-metrics:v' + $.values.common.versions.kubeStateMetrics,
         nodeExporter: 'quay.io/prometheus/node-exporter:v' + $.values.common.versions.nodeExporter,
         prometheus: 'quay.io/prometheus/prometheus:v' + $.values.common.versions.prometheus,
-        prometheusAdapter: 'directxman12/k8s-prometheus-adapter:v' + $.values.common.versions.prometheusAdapter,
+        prometheusAdapter: 'k8s.gcr.io/prometheus-adapter/prometheus-adapter:v' + $.values.common.versions.prometheusAdapter,
         prometheusOperator: 'quay.io/prometheus-operator/prometheus-operator:v' + $.values.common.versions.prometheusOperator,
         prometheusOperatorReloader: 'quay.io/prometheus-operator/prometheus-config-reloader:v' + $.values.common.versions.prometheusOperator,
         kubeRbacProxy: 'quay.io/brancz/kube-rbac-proxy:v' + $.values.common.versions.kubeRbacProxy,
@@ -97,6 +99,10 @@ local platformPatch = import './platforms/platforms.libsonnet';
       version: $.values.common.versions.prometheusAdapter,
       image: $.values.common.images.prometheusAdapter,
       prometheusURL: 'http://prometheus-' + $.values.prometheus.name + '.' + $.values.common.namespace + '.svc.cluster.local:9090/',
+      rangeIntervals+: {
+        kubelet: utils.rangeInterval($.kubernetesControlPlane.serviceMonitorKubelet.spec.endpoints[0].interval),
+        nodeExporter: utils.rangeInterval($.nodeExporter.serviceMonitor.spec.endpoints[0].interval),
+      },
     },
     prometheusOperator: {
       namespace: $.values.common.namespace,

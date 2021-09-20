@@ -28,9 +28,15 @@ local defaults = {
     ruleLabels: {},
     _config: {
       nodeExporterSelector: 'job="' + defaults.name + '"',
+      // Adjust NodeFilesystemSpaceFillingUp warning and critical thresholds according to the following default kubelet
+      // GC values,
+      // imageGCLowThresholdPercent: 80
+      // imageGCHighThresholdPercent: 85
+      // See https://kubernetes.io/docs/reference/config-api/kubelet-config.v1beta1/ for more details.
+      fsSpaceFillingUpWarningThreshold: 20,
       fsSpaceFillingUpCriticalThreshold: 15,
       diskDeviceSelector: 'device=~"mmcblk.p.+|nvme.+|rbd.+|sd.+|vd.+|xvd.+|dm-.+|dasd.+"',
-      runbookURLPattern: 'https://github.com/prometheus-operator/kube-prometheus/wiki/%s',
+      runbookURLPattern: 'https://runbooks.prometheus-operator.dev/runbooks/node/%s',
     },
   },
 };
@@ -44,7 +50,7 @@ function(params) {
   assert std.isObject(ne._config.mixin._config),
 
   mixin:: (import 'github.com/prometheus/node_exporter/docs/node-mixin/mixin.libsonnet') +
-          (import 'github.com/kubernetes-monitoring/kubernetes-mixin/alerts/add-runbook-links.libsonnet') {
+          (import 'github.com/kubernetes-monitoring/kubernetes-mixin/lib/add-runbook-links.libsonnet') {
             _config+:: ne._config.mixin._config,
           },
 
@@ -175,8 +181,11 @@ function(params) {
         '--no-collector.wifi',
         '--no-collector.hwmon',
         '--collector.filesystem.ignored-mount-points=^/(dev|proc|sys|var/lib/docker/.+|var/lib/kubelet/pods/.+)($|/)',
-        '--collector.netclass.ignored-devices=^(veth.*)$',
-        '--collector.netdev.device-exclude=^(veth.*)$',
+        // NOTE: ignore veth network interface associated with containers.
+        // OVN renames veth.* to <rand-hex>@if<X> where X is /sys/class/net/<if>/ifindex
+        // thus [a-z0-9] regex below
+        '--collector.netclass.ignored-devices=^(veth.*|[a-f0-9]{15})$',
+        '--collector.netdev.device-exclude=^(veth.*|[a-f0-9]{15})$',
       ],
       volumeMounts: [
         { name: 'sys', mountPath: '/host/sys', mountPropagation: 'HostToContainer', readOnly: true },

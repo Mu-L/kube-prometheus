@@ -68,15 +68,16 @@ function(params) {
     },
   },
 
-  // Add object only if user passes config and config is not empty
-  [if std.objectHas(params, 'config') && std.length(params.config) > 0 then 'config']: glib.grafana.config,
+  config: glib.grafana.config,
   service: glib.grafana.service,
   serviceAccount: glib.grafana.serviceAccount,
   deployment: glib.grafana.deployment,
   dashboardDatasources: glib.grafana.dashboardDatasources,
   dashboardSources: glib.grafana.dashboardSources,
 
-  dashboardDefinitions: if std.length(g._config.dashboards) > 0 then {
+  dashboardDefinitions: if std.length(g._config.dashboards) > 0 ||
+                           std.length(g._config.rawDashboards) > 0 ||
+                           std.length(g._config.folderDashboards) > 0 then {
     apiVersion: 'v1',
     kind: 'ConfigMapList',
     items: glib.grafana.dashboardDefinitions,

@@ -70,6 +70,7 @@ If you are migrating from `release-0.7` branch or earlier please read [what chan
       - [Authentication problem](#authentication-problem)
       - [Authorization problem](#authorization-problem)
     - [kube-state-metrics resource usage](#kube-state-metrics-resource-usage)
+    - [Error retrieving kube-proxy metrics](#error-retrieving-kube-proxy-metrics)
   - [Contributing](#contributing)
   - [License](#license)
 
@@ -105,17 +106,17 @@ $ minikube addons disable metrics-server
 
 The following versions are supported and work as we test against these versions in their respective branches. But note that other versions might work!
 
-| kube-prometheus stack                                                                            | Kubernetes 1.18 | Kubernetes 1.19 | Kubernetes 1.20 | Kubernetes 1.21 |
-|--------------------------------------------------------------------------------------------------|-----------------|-----------------|-----------------|-----------------|
-| [`release-0.5`](https://github.com/prometheus-operator/kube-prometheus/tree/release-0.5)         | ✔               | ✗               | ✗               | ✗               |
-| [`release-0.6`](https://github.com/prometheus-operator/kube-prometheus/tree/release-0.6)         | ✗               | ✔               | ✗               | ✗               |
-| [`release-0.7`](https://github.com/prometheus-operator/kube-prometheus/tree/release-0.7)         | ✗               | ✔               | ✔               | ✗               |
-| [`release-0.8`](https://github.com/prometheus-operator/kube-prometheus/tree/release-0.8)         | ✗               | ✗               | ✔               | ✔               |
-| [`HEAD`](https://github.com/prometheus-operator/kube-prometheus/tree/main)                       | ✗               | ✗               | ✔               | ✔               |
+| kube-prometheus stack                                                                    | Kubernetes 1.18 | Kubernetes 1.19 | Kubernetes 1.20 | Kubernetes 1.21 | Kubernetes 1.22 |
+|------------------------------------------------------------------------------------------|-----------------|-----------------|-----------------|-----------------|-----------------|
+| [`release-0.6`](https://github.com/prometheus-operator/kube-prometheus/tree/release-0.6) | ✗               | ✔               | ✗               | ✗               | ✗               |
+| [`release-0.7`](https://github.com/prometheus-operator/kube-prometheus/tree/release-0.7) | ✗               | ✔               | ✔               | ✗               | ✗               |
+| [`release-0.8`](https://github.com/prometheus-operator/kube-prometheus/tree/release-0.8) | ✗               | ✗               | ✔               | ✔               | ✗               |
+| [`release-0.9`](https://github.com/prometheus-operator/kube-prometheus/tree/release-0.9) | ✗               | ✗               | ✗               | ✔               | ✔               |
+| [`HEAD`](https://github.com/prometheus-operator/kube-prometheus/tree/main)               | ✗               | ✗               | ✗               | ✔               | ✔               |
 
 ## Quickstart
 
->Note: For versions before Kubernetes v1.20.z refer to the [Kubernetes compatibility matrix](#kubernetes-compatibility-matrix) in order to choose a compatible branch.
+>Note: For versions before Kubernetes v1.21.z refer to the [Kubernetes compatibility matrix](#kubernetes-compatibility-matrix) in order to choose a compatible branch.
 
 This project is intended to be used as a library (i.e. the intent is not for you to create your own modified copy of this repository).
 
@@ -769,6 +770,13 @@ config. They default to:
       memoryPerNode: '30Mi',
     }
 ```
+
+### Error retrieving kube-proxy metrics
+By default, kubeadm will configure kube-proxy to listen on 127.0.0.1 for metrics. Because of this prometheus would not be able to scrape these metrics. This would have to be changed to 0.0.0.0 in one of the following two places:
+
+1. Before cluster initialization, the config file passed to kubeadm init should have KubeProxyConfiguration manifest with the field metricsBindAddress set to 0.0.0.0:10249
+2. If the k8s cluster is already up and running, we'll have to modify the configmap kube-proxy in the namespace kube-system and set the metricsBindAddress field. After this kube-proxy daemonset would have to be restarted with
+`kubectl -n kube-system rollout restart daemonset kube-proxy`
 
 ## Contributing
 
