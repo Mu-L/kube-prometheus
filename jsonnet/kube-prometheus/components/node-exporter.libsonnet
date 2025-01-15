@@ -7,7 +7,7 @@ local defaults = {
   name:: 'node-exporter',
   namespace:: error 'must provide namespace',
   version:: error 'must provide version',
-  image:: error 'must provide version',
+  image:: error 'must provide image',
   kubeRbacProxyImage:: error 'must provide kubeRbacProxyImage',
   resources:: {
     requests: { cpu: '102m', memory: '180Mi' },
@@ -92,7 +92,10 @@ function(params) {
   clusterRoleBinding: {
     apiVersion: 'rbac.authorization.k8s.io/v1',
     kind: 'ClusterRoleBinding',
-    metadata: ne._metadata,
+    metadata: {
+      name: ne._config.name,
+      labels: ne._config.commonLabels,
+    },
     roleRef: {
       apiGroup: 'rbac.authorization.k8s.io',
       kind: 'ClusterRole',
@@ -108,7 +111,10 @@ function(params) {
   clusterRole: {
     apiVersion: 'rbac.authorization.k8s.io/v1',
     kind: 'ClusterRole',
-    metadata: ne._metadata,
+    metadata: {
+      name: ne._config.name,
+      labels: ne._config.commonLabels,
+    },
     rules: [
       {
         apiGroups: ['authentication.k8s.io'],
@@ -289,6 +295,7 @@ function(params) {
             serviceAccountName: ne._config.name,
             priorityClassName: 'system-cluster-critical',
             securityContext: {
+              runAsGroup: 65534,
               runAsUser: 65534,
               runAsNonRoot: true,
             },

@@ -1,3 +1,32 @@
+## release-0.14 / 2024-09-12
+
+* [CHANGE] Prefer new form for `kube_node_status_capacity_pods` metric [#2269](https://github.com/prometheus-operator/kube-prometheus/pull/2269)
+* [CHANGE] Add runAsGroup to all components [#2424](https://github.com/prometheus-operator/kube-prometheus/pull/2424)
+* [FEATURE] Add support for ScrapeConfig [#2232](https://github.com/prometheus-operator/kube-prometheus/pull/2232)
+* [FEATURE] Add Kubernetes components SLI metrics [#2496](https://github.com/prometheus-operator/kube-prometheus/pull/2496)
+* [FEATURE] Add monitor and rules resources to user-facing roles add-on [#2238](https://github.com/prometheus-operator/kube-prometheus/pull/2238)
+* [BUGFIX] Add thanos-sidecar metrics port to Prometheus Service and NetworkPolicy [#2330](https://github.com/prometheus-operator/kube-prometheus/pull/2330)
+* [ENHANCEMENT] Add ability to inject Secrets into alertmanager [#2206](https://github.com/prometheus-operator/kube-prometheus/pull/2206)
+* [ENHANCEMENT] Add securityContext items and Pod security labels [#2178](https://github.com/prometheus-operator/kube-prometheus/pull/2178)
+
+## release-0.13 / 2023-08-31
+
+* [CHANGE] Added a AKS platform to `platforms.libsonnet` [#1997](https://github.com/prometheus-operator/kube-prometheus/pull/1997)
+* [CHANGE] Disable btrfs collector by default [#2074](https://github.com/prometheus-operator/kube-prometheus/pull/2074)
+* [CHANGE] Enable Multi Cluster alerts by default [#2099](https://github.com/prometheus-operator/kube-prometheus/pull/2099)
+* [FEATURE] Create dedicated Service to expose CoreDNS metric [#2107](https://github.com/prometheus-operator/kube-prometheus/pull/2107)
+* [FEATURE] Add Windows support using Hostprocess instead of static_configs [#2048](https://github.com/prometheus-operator/kube-prometheus/pull/2048)
+* [BUGFIX] Fix a compilation error when building the custom-metrics addon [#1996](https://github.com/prometheus-operator/kube-prometheus/pull/1996)
+* [BUGFIX] Add `prometheus-adapter` in Prometheus's NetworkPolicy [#1982](https://github.com/prometheus-operator/kube-prometheus/pull/1982)
+* [BUGFIX] Fix namespace specified in manifest non-namespaced resources [#2158](https://github.com/prometheus-operator/kube-prometheus/pull/2158)
+* [BUGFIX] Override ServiceAccount, Role and ClusterRole names in RoleBinding and ClusterRoleBinding [#2135](https://github.com/prometheus-operator/kube-prometheus/pull/2135)
+* [BUGFIX] Remove deprecated `--logtostderr` argument of prometheus-adapter [#2185](https://github.com/prometheus-operator/kube-prometheus/pull/2185)
+* [BUGFIX] Fix alertmanager external config example [#1891](https://github.com/prometheus-operator/kube-prometheus/pull/1891)
+* [ENHANCEMENT] Add startupProbe to prometheus-adapter [#2029](https://github.com/prometheus-operator/kube-prometheus/pull/2029)
+* [ENHANCEMENT] Added configurable default values for kube-rbac-proxy in prometheus-operator, node-exporter and blackbox-exporter [#1987](https://github.com/prometheus-operator/kube-prometheus/pull/1987)
+* [ENHANCEMENT] Modify control plane ServiceMonitors to be compatible with Argo [#2041](https://github.com/prometheus-operator/kube-prometheus/pull/2041)
+* [ENHANCEMENT] Add md5 hash of the ConfigMap in Prometheus Adapter Deployment Annotations to force its recreation [#2195](https://github.com/prometheus-operator/kube-prometheus/pull/2195)
+
 ## release-0.12 / 2023-01-19
 
 * [CHANGE] Updates Prometheus Adapater version to 0.10.0 [#1865](https://github.com/prometheus-operator/kube-prometheus/pull/1865)

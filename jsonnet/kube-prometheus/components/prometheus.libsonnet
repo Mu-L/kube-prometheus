@@ -175,7 +175,10 @@ function(params) {
              ] +
              (
                if p._config.thanos != null then
-                 [{ name: 'grpc', port: 10901, targetPort: 10901 }]
+                 [
+                   { name: 'grpc', port: 10901, targetPort: 10901 },
+                   { name: 'http', port: 10902, targetPort: 10902 },
+                 ]
                else []
              ),
       selector: p._config.selectorLabels,
@@ -220,7 +223,7 @@ function(params) {
         verbs: ['get'],
       },
       {
-        nonResourceURLs: ['/metrics'],
+        nonResourceURLs: ['/metrics', '/metrics/slis'],
         verbs: ['get'],
       },
     ],
@@ -248,11 +251,11 @@ function(params) {
     roleRef: {
       apiGroup: 'rbac.authorization.k8s.io',
       kind: 'Role',
-      name: p._metadata.name + '-config',
+      name: p.roleConfig.metadata.name,
     },
     subjects: [{
       kind: 'ServiceAccount',
-      name: p._metadata.name,
+      name: p.serviceAccount.metadata.name,
       namespace: p._config.namespace,
     }],
   },
@@ -266,11 +269,11 @@ function(params) {
     roleRef: {
       apiGroup: 'rbac.authorization.k8s.io',
       kind: 'ClusterRole',
-      name: p._metadata.name,
+      name: p.clusterRole.metadata.name,
     },
     subjects: [{
       kind: 'ServiceAccount',
-      name: p._metadata.name,
+      name: p.serviceAccount.metadata.name,
       namespace: p._config.namespace,
     }],
   },
@@ -340,6 +343,8 @@ function(params) {
       probeNamespaceSelector: {},
       ruleNamespaceSelector: {},
       ruleSelector: p._config.ruleSelector,
+      scrapeConfigSelector: {},
+      scrapeConfigNamespaceSelector: {},
       serviceMonitorSelector: {},
       serviceMonitorNamespaceSelector: {},
       nodeSelector: { 'kubernetes.io/os': 'linux' },
